@@ -50,7 +50,7 @@ class Board(Canvas):
             row = 0
 
             while row < len(self.positions):
-                if self.positions[0][column].color == "red" or self.positions[0][column].color == "blue":
+                if self.positions[0][column].color == "red" or self.positions[0][column].color == "blue": 
                     break
                 
                 if self.positions[row][column].color == "red" or self.positions[row][column].color == "blue":
