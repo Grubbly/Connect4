@@ -44,7 +44,11 @@ class Board(Canvas):
             for column in range(0, windowWidth-60, int(windowWidth/7)):
                 row_positions.append(Piece(column, row, self))
             self.positions.append(row_positions)
-        #self.bind("<Button-1>", self.setPiece)
+        self.bind("<Button-1>", self.setPiece)
+    
+    def setPiece(self, event):
+        # if self.turn:
+            print(str(event.x))
 
 
 
