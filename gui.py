@@ -1,13 +1,13 @@
 from tkinter import *
 from tkinter import font
 
-windowWidth = 400
+windowWidth = 700
 windowHeight = 600
 
 class GameDetails(Frame):
     def __init__(self, master):
         Frame.__init__(self, master=root, bg="green")
-        self.configure(width=windowWidth, height=100) 
+        self.configure(width=500, height=100) 
         self.text = Label(self, text="Connect 4", font=font.Font(self, size=22, family='Arial'), background="green")
         self.author = Label(self, text="Tristan Van Cise", font=font.Font(self, size=12, family='Arial'), background="green")
         self.text.grid(sticky=W, pady=20)
@@ -30,23 +30,23 @@ class Piece(object):
 class Board(Canvas):
     def __init__(self, master):
         Canvas.__init__(self)
-        self.configure(width=windowWidth, height=windowHeight, bg="green")
+        self.configure(width=windowWidth+70, height=windowHeight+70, bg="green")
         
         self.player = 1
         self.color = "blue"
         self.positions = []
         self.turn = True
 
-        for row in range(0, windowHeight-60, int(windowHeight/6)):
+        for row in range(0, windowHeight, int(windowHeight/6)):
             row_positions = []
-            for column in range(0, windowWidth-60, int(windowWidth/7)):
+            for column in range(0, windowWidth, int(windowWidth/7)):
                 row_positions.append(Piece(column, row, self))
             self.positions.append(row_positions)
         self.bind("<Button-1>", self.setPiece)
     
     def setPiece(self, event):
         if self.turn:
-            column = int(event.x/71) # integer divide to get column
+            column = int(event.x/100) # integer divide to get column
             row = 0
 
             while row < len(self.positions):
@@ -82,7 +82,7 @@ class Board(Canvas):
 
 
 root = Tk()
-root.geometry("400x600")
+root.geometry("600x800")
 root.title("Connect 4")
 
 gameDetails = GameDetails(root)
