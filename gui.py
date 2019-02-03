@@ -50,7 +50,7 @@ class Board(Canvas):
             row = 0
 
             while row < len(self.positions):
-                if self.positions[0][column].color == "red" or self.positions[0][0].color == "blue":
+                if self.positions[0][column].color == "red" or self.positions[0][column].color == "blue":
                     break
                 
                 if self.positions[row][column].color == "red" or self.positions[row][column].color == "blue":
@@ -82,7 +82,7 @@ class Board(Canvas):
 
 
 root = Tk()
-root.geometry("600x800")
+root.geometry("675x700")
 root.title("Connect 4")
 
 gameDetails = GameDetails(root)
