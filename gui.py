@@ -21,7 +21,6 @@ class Piece(object):
         self.y = y
         self.color = color
         
-        self.radius = 30
         self.piece = self.canvas.create_oval(x+10, y+10, x+61, y+61, fill=color, outline="yellow")
     
     def switchColor(self, color):
@@ -38,7 +37,6 @@ class Board(Canvas):
         self.positions = []
         self.turn = True
 
-
         for row in range(0, windowHeight-60, int(windowHeight/6)):
             row_positions = []
             for column in range(0, windowWidth-60, int(windowWidth/7)):
@@ -47,8 +45,39 @@ class Board(Canvas):
         self.bind("<Button-1>", self.setPiece)
     
     def setPiece(self, event):
-        # if self.turn:
-            print(str(event.x))
+        if self.turn:
+            column = int(event.x/71) # integer divide to get column
+            row = 0
+
+            while row < len(self.positions):
+                if self.positions[0][column].color == "red" or self.positions[0][0].color == "blue":
+                    break
+                
+                if self.positions[row][column].color == "red" or self.positions[row][column].color == "blue":
+                    self.positions[row-1][column].switchColor(self.color)
+                    break
+                
+                elif row == len(self.positions) - 1:
+                    self.positions[row][column].switchColor(self.color)
+                    break
+
+                if self.positions[row][column].color != "red" and self.positions[row][column].color != "blue":
+                    row += 1
+
+            if self.player == 1:
+                self.player = 2
+                gameDetails.text.config(text="Player 2's Turn")
+                self.color = "red"
+
+            elif self.player == 2:
+                self.player = 1
+                gameDetails.text.config(text="Player 1's Turn")
+                self.color = "blue"
+            
+            self.checkWin()
+        
+    def checkWin(self):
+        print("TESTING Player: " + str(self.player))
 
 
 
