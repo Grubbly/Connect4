@@ -50,20 +50,27 @@ class Board(Canvas):
             row = 0
 
             while row < len(self.positions):
+                # Full row condition
                 if self.positions[0][column].color == "red" or self.positions[0][column].color == "blue": 
                     break
                 
+                # If there exits a piece in the column, place the next piece above it
                 if self.positions[row][column].color == "red" or self.positions[row][column].color == "blue":
                     self.positions[row-1][column].switchColor(self.color)
                     break
                 
+                # If there is no piece in the column, place it in the first spot
                 elif row == len(self.positions) - 1:
                     self.positions[row][column].switchColor(self.color)
                     break
 
+                # No open spot? Increment to find it
                 if self.positions[row][column].color != "red" and self.positions[row][column].color != "blue":
                     row += 1
 
+
+            # Change turns:
+            
             if self.player == 1:
                 self.player = 2
                 gameDetails.text.config(text="Player 2's Turn")
