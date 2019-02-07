@@ -50,7 +50,9 @@ class Board(Canvas):
         if self.turn:
             column = int(event.x/100) # integer divide to get column
             self.placePiece(column, "player")
-            self.setAIPiece()
+
+            if gameMode.get() == options[1]: # Random AI
+                self.setAIPiece()
     
     def setAIPiece(self):
         column = random.randint(0,6)
@@ -125,6 +127,10 @@ class Board(Canvas):
                 if(downupdiagonalWinCondition):
                     gameDetails.text.config(text=self.positions[row][column].color + " wins!")
 
+
+def menuChange(*args):
+    restart()
+
 def restart():
     global gameDetails
     gameDetails.text.config(text="")
@@ -132,7 +138,9 @@ def restart():
     gameDetails.grid(row=0, column=0)
 
     board = Board(root)
-    board.grid(row=1, column=0)
+    board.grid(row=2, column=0)
+    
+
 
 root = Tk()
 root.geometry("675x700")
@@ -142,6 +150,13 @@ gameDetails = GameDetails(root)
 gameDetails.grid(row=0, column=0)
 
 board = Board(root)
-board.grid(row=1, column=0)
+board.grid(row=2, column=0)
+
+gameMode = StringVar(root)
+options = ["Hotseat", "Random AI"]
+gameMode.set(options[0])
+gameMode.trace("w", menuChange)
+selectionMenu = OptionMenu(root, gameMode, *options)
+selectionMenu.grid(row=1, column=0)
 
 root.mainloop()
