@@ -84,9 +84,34 @@ class Board(Canvas):
             self.checkWin()
         
     def checkWin(self):
-        print("TESTING Player: " + str(self.player))
-
-
+        # Horizontal
+        for row in range(len(self.positions)):
+            for column in range(3):
+                horizontalFourInARow = self.positions[row][column].color == self.positions[row][column+1].color == self.positions[row][column+2].color == self.positions[row][column+3].color
+                horizontalWinCondition = horizontalFourInARow and self.positions[row][column].color != "white"
+                if(horizontalWinCondition):
+                    gameDetails.text.config(text=self.positions[row][column].color + " wins!")
+        # Vertical
+        for row in range(3):
+            for column in range(len(self.positions[0])):
+                verticalFourInARow = self.positions[row][column].color == self.positions[row+1][column].color == self.positions[row+2][column].color == self.positions[row+3][column].color
+                verticalWinCondition = verticalFourInARow and self.positions[row][column].color != "white"
+                if(verticalWinCondition):
+                    gameDetails.text.config(text=self.positions[row][column].color + " wins!")
+        # upDownDiagonal
+        for row in range(3):
+            for column in range(4):
+                upDownDiagonalFourInARow = self.positions[row][column].color == self.positions[row+1][column+1].color == self.positions[row+2][column+2].color == self.positions[row+3][column+3].color
+                upDownDiagonalWinCondition = upDownDiagonalFourInARow and self.positions[row][column].color != "white"
+                if(upDownDiagonalWinCondition):
+                    gameDetails.text.config(text=self.positions[row][column].color + " wins!")
+        # downupdiagonal
+        for row in range(3):
+            for column in range(6,2,-1):
+                downupdiagonalFourInARow = self.positions[row][column].color == self.positions[row+1][column-1].color == self.positions[row+2][column-2].color == self.positions[row+3][column-3].color
+                downupdiagonalWinCondition = downupdiagonalFourInARow and self.positions[row][column].color != "white"
+                if(downupdiagonalWinCondition):
+                    gameDetails.text.config(text=self.positions[row][column].color + " wins!")
 
 root = Tk()
 root.geometry("675x700")
