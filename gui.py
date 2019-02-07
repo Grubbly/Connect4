@@ -113,6 +113,15 @@ class Board(Canvas):
                 if(downupdiagonalWinCondition):
                     gameDetails.text.config(text=self.positions[row][column].color + " wins!")
 
+def restart():
+    global gameDetails
+    gameDetails.text.config(text="")
+    gameDetails = GameDetails(root)
+    gameDetails.grid(row=0, column=0)
+
+    board = Board(root)
+    board.grid(row=1, column=0)
+
 root = Tk()
 root.geometry("675x700")
 root.title("Connect 4")
