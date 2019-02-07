@@ -53,7 +53,14 @@ class Board(Canvas):
 
             if gameMode.get() == options[1]: # Random AI
                 self.setAIPiece()
+            if gameMode.get() == options[2]: # Defense
+                self.setDefenseAIPiece()
     
+    def setDefenseAIPiece(self):
+        column = random.randint(0,6)
+        print("AI placed piece in column: " + str(column+1))
+        self.placePiece(column, "AI")
+
     def setAIPiece(self):
         column = random.randint(0,6)
         print("AI placed piece in column: " + str(column+1))
@@ -67,7 +74,9 @@ class Board(Canvas):
                     if(type == "AI"):
                         print("Bad AI move generated, regenerating...")
                         self.setAIPiece()
-                    break
+                    else:
+                        print("Bad player move")
+                    return
                 
                 # If there exits a piece in the column, place the next piece above it
                 if self.positions[row][column].color == "red" or self.positions[row][column].color == "blue":
@@ -153,7 +162,7 @@ board = Board(root)
 board.grid(row=2, column=0)
 
 gameMode = StringVar(root)
-options = ["Hotseat", "Random AI"]
+options = ["Hotseat", "Random AI", "Defense"]
 gameMode.set(options[0])
 gameMode.trace("w", menuChange)
 selectionMenu = OptionMenu(root, gameMode, *options)
