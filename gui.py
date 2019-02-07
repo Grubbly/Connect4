@@ -1,3 +1,5 @@
+import random
+
 from tkinter import *
 from tkinter import font
 
@@ -43,15 +45,26 @@ class Board(Canvas):
                 row_positions.append(Piece(column, row, self))
             self.positions.append(row_positions)
         self.bind("<Button-1>", self.setPiece)
-    
+
     def setPiece(self, event):
         if self.turn:
             column = int(event.x/100) # integer divide to get column
-            row = 0
+            self.placePiece(column, "player")
+            self.setAIPiece()
+    
+    def setAIPiece(self):
+        column = random.randint(0,6)
+        print("AI placed piece in column: " + str(column+1))
+        self.placePiece(column, "AI")
 
+    def placePiece(self, column, type="player"):
+            row = 0
             while row < len(self.positions):
-                # Full row condition
+                # Full column condition
                 if self.positions[0][column].color == "red" or self.positions[0][column].color == "blue": 
+                    if(type == "AI"):
+                        print("Bad AI move generated, regenerating...")
+                        self.setAIPiece()
                     break
                 
                 # If there exits a piece in the column, place the next piece above it
@@ -67,7 +80,6 @@ class Board(Canvas):
                 # No open spot? Increment to find it
                 if self.positions[row][column].color != "red" and self.positions[row][column].color != "blue":
                     row += 1
-
 
             # Change turns:
             
