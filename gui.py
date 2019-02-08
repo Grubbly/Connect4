@@ -57,8 +57,15 @@ class Board(Canvas):
                 self.setDefenseAIPiece()
     
     def setDefenseAIPiece(self):
-        column = random.randint(0,6)
-        print("AI placed piece in column: " + str(column+1))
+        column = self.checkThreeInARow()
+        noThreeInARow = 9000
+
+        if(column == noThreeInARow):
+            column = random.randint(0,6)
+        else:
+            print("CheckThreeInARow: " + str(column))
+
+        #print("AI placed piece in column: " + str(column+1))
         self.placePiece(column, "AI")
 
     def setAIPiece(self):
@@ -75,16 +82,19 @@ class Board(Canvas):
                         print("Bad AI move generated, regenerating...")
                         self.setAIPiece()
                     else:
+                        # TODO: Label this on GUI
                         print("Bad player move")
                     return
                 
                 # If there exits a piece in the column, place the next piece above it
                 if self.positions[row][column].color == "red" or self.positions[row][column].color == "blue":
+                    print("Piece Placed: (" + str(column) + ", " + str(row) + ")")
                     self.positions[row-1][column].switchColor(self.color)
                     break
                 
                 # If there is no piece in the column, place it in the first spot
                 elif row == len(self.positions) - 1:
+                    print("Piece Placed: (" + str(column) + ", " + str(row) + ")")
                     self.positions[row][column].switchColor(self.color)
                     break
 
@@ -109,7 +119,7 @@ class Board(Canvas):
     def checkWin(self):
         # Horizontal
         for row in range(len(self.positions)):
-            for column in range(3):
+            for column in range(4):
                 horizontalFourInARow = self.positions[row][column].color == self.positions[row][column+1].color == self.positions[row][column+2].color == self.positions[row][column+3].color
                 horizontalWinCondition = horizontalFourInARow and self.positions[row][column].color != "white"
                 if(horizontalWinCondition):
@@ -136,6 +146,51 @@ class Board(Canvas):
                 if(downupdiagonalWinCondition):
                     gameDetails.text.config(text=self.positions[row][column].color + " wins!")
 
+    def checkThreeInARow(self):
+        # upDownDiagonal
+        for row in range(3):
+            for column in range(4):
+                upDownDiagonalFourInARow = self.positions[row+3][column+3].color == self.positions[row+1][column+1].color == self.positions[row+2][column+2].color
+                upDownDiagonalWinCondition = upDownDiagonalFourInARow and self.positions[row+3][column+3].color == "blue"
+                if(upDownDiagonalWinCondition and self.positions[row][column].color == "white" and self.positions[row+1][column].color != "white"):
+                    print("upDownDiagonal")
+                    return column
+        # downupdiagonal
+        for row in range(3):
+            for column in range(6,2,-1):
+                downupdiagonalFourInARow = self.positions[row+3][column-3].color == self.positions[row+1][column-1].color == self.positions[row+2][column-2].color
+                downupdiagonalWinCondition = downupdiagonalFourInARow and self.positions[row+3][column-3].color == "blue"
+                if(downupdiagonalWinCondition and self.positions[row][column].color == "white" and self.positions[row+1][column].color != "white"):
+                    print("downUpDiagonal")
+                    return column
+        
+        # Vertical
+        for row in range(3):
+            for column in range(len(self.positions[0])):
+                verticalFourInARow = self.positions[row+1][column].color == self.positions[row+2][column].color == self.positions[row+3][column].color
+                verticalWinCondition = verticalFourInARow and self.positions[row+3][column].color == "blue"
+                if(verticalWinCondition and self.positions[row][column].color == "white"):
+                    print("vertical")
+                    return column
+
+        # Horizontal
+        for row in range(len(self.positions)):
+            for column in range(5):
+                horizontalFourInARow = self.positions[row][column].color == self.positions[row][column+1].color 
+                horizontalWinCondition = horizontalFourInARow and self.positions[row][column].color == "blue"
+                if horizontalWinCondition and self.positions[row][column+2].color == "white":
+                    if row == 5:
+                        return column+2
+                    elif self.positions[row+1][column+2].color != "white":
+                        return column+2
+                elif horizontalWinCondition and column >= 1 and self.positions[row][column-1].color == "white":
+                    if row == 5:
+                        return column-1
+                    elif self.positions[row+1][column-1].color != "white":
+                        return column-1
+
+        return 9000
+
 
 def menuChange(*args):
     restart()
@@ -147,19 +202,19 @@ def restart():
     gameDetails.grid(row=0, column=0)
 
     board = Board(root)
-    board.grid(row=2, column=0)
+    board.grid(row=3, column=0)
     
 
 
 root = Tk()
-root.geometry("675x700")
+root.geometry("675x750")
 root.title("Connect 4")
 
 gameDetails = GameDetails(root)
 gameDetails.grid(row=0, column=0)
 
 board = Board(root)
-board.grid(row=2, column=0)
+board.grid(row=3, column=0)
 
 gameMode = StringVar(root)
 options = ["Hotseat", "Random AI", "Defense"]
@@ -167,5 +222,12 @@ gameMode.set(options[0])
 gameMode.trace("w", menuChange)
 selectionMenu = OptionMenu(root, gameMode, *options)
 selectionMenu.grid(row=1, column=0)
+
+gameMode2 = StringVar(root)
+options2 = ["Hotseat", "Random AI", "Defense"]
+gameMode2.set(options2[0])
+gameMode2.trace("w", menuChange)
+selectionMenu2 = OptionMenu(root, gameMode2, *options2)
+selectionMenu2.grid(row=2, column=0)
 
 root.mainloop()
