@@ -56,18 +56,17 @@ class Board(Canvas):
             self.positions.append(row_positions)
         self.bind("<Button-1>", self.setPiece)
 
-    def startAIGame(self, event):
-        for games in range(int(numGames.get())):
-            while self.turn:
-                if gameMode.get() == options[1]: # Random AI
-                    self.setAIPiece()
-                if gameMode.get() == options[2]: # Defense
-                    self.setDefenseAIPiece()
+    def startAIGame(self):
+        while self.turn:
+            if gameMode.get() == options[1]: # Random AI
+                self.setAIPiece()
+            if gameMode.get() == options[2]: # Defense
+                self.setDefenseAIPiece()
 
-                if gameMode2.get() == options2[1]: # Random AI
-                    self.setAIPiece()
-                if gameMode2.get() == options2[2]: # Defense
-                    self.setDefenseAIPiece()
+            if gameMode2.get() == options2[1]: # Random AI
+                self.setAIPiece()
+            if gameMode2.get() == options2[2]: # Defense
+                self.setDefenseAIPiece()
 
     def setPiece(self, event):
         if self.turn:
@@ -152,10 +151,10 @@ class Board(Canvas):
             global redWins
             redWins += 1
             redWinsLabel.config(text=redWinsText + str(redWins))
-        if color == "blue":
+        elif color == "blue":
             global blueWins
             blueWins += 1
-            blueWinsLabel.config(text=blueWinsText + str(blueWins))
+            blueWinsLabel.config(text=blueWinsText + str(blueWins/2))
 
     def checkWin(self):
         # horizontal
@@ -260,7 +259,8 @@ class Board(Canvas):
 
 
 def menuChange(*args):
-    restart()
+    print("090909")
+    # restart()
 
 def restart():
     global gameDetails
@@ -268,17 +268,26 @@ def restart():
     gameDetails = GameDetails(root)
     gameDetails.grid(row=0, column=0)
 
+    global board
     board = Board(boardFrame)
     board.grid(row=90, column=0)
 
-    startButton = Button(root, text="Start AI Battle!")
-    startButton.bind("<Button-1>", board.startAIGame)
-    startButton.grid(row=8, column=0)
-    
+def resetGlobals():
+    global redWins, blueWins, ties
+    redWins = 0
+    blueWins = 0
+    ties = 0
+
+def startAIGame(*args):
+    resetGlobals()
+    for game in range(int(numGames.get())):
+        board.startAIGame()
+        restart()
+    print(str(int(numGames.get())) + " Games Finished")
 
 
 root = Tk()
-root.geometry("675x800")
+root.geometry("675x850")
 root.title("Connect 4")
 
 gameDetails = GameDetails(root)
@@ -290,7 +299,7 @@ board.grid(row=90, column=0)
 
 gameMode = StringVar(root)
 options = ["Player", "Random AI", "Defense"]
-gameMode.set(options[0])
+gameMode.set(options[2])
 gameMode.trace("w", menuChange)
 selectionMenu = OptionMenu(root, gameMode, *options)
 selectionMenu.grid(row=1, column=0)
@@ -298,7 +307,7 @@ selectionMenu.config(bg="BLUE")
 
 gameMode2 = StringVar(root)
 options2 = ["Player", "Random AI", "Defense"]
-gameMode2.set(options2[0])
+gameMode2.set(options2[1])
 gameMode2.trace("w", menuChange)
 selectionMenu2 = OptionMenu(root, gameMode2, *options2)
 selectionMenu2.grid(row=2, column=0)
@@ -316,7 +325,7 @@ numGames = Entry(root)
 numGames.grid(row=8, column=0)
 
 startButton = Button(root, text="Start AI Battle!")
-startButton.bind("<Button-1>", board.startAIGame)
+startButton.bind("<Button-1>", startAIGame)
 startButton.grid(row=9, column=0)
 
 
