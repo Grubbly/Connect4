@@ -1,10 +1,20 @@
 import random
 
+from time import sleep
+
 from tkinter import *
 from tkinter import font
 
 windowWidth = 700
 windowHeight = 600
+
+blueWins = 0
+redWins = 0
+ties = 0
+
+blueWinsText = "Blue Wins: " 
+redWinsText = "Red Wins: " 
+tiesText = "Ties: "
 
 class GameDetails(Frame):
     def __init__(self, master):
@@ -45,6 +55,19 @@ class Board(Canvas):
                 row_positions.append(Piece(column, row, self))
             self.positions.append(row_positions)
         self.bind("<Button-1>", self.setPiece)
+
+    def startAIGame(self, event):
+        for games in range(int(numGames.get())):
+            while self.turn:
+                if gameMode.get() == options[1]: # Random AI
+                    self.setAIPiece()
+                if gameMode.get() == options[2]: # Defense
+                    self.setDefenseAIPiece()
+
+                if gameMode2.get() == options2[1]: # Random AI
+                    self.setAIPiece()
+                if gameMode2.get() == options2[2]: # Defense
+                    self.setDefenseAIPiece()
 
     def setPiece(self, event):
         if self.turn:
@@ -123,22 +146,40 @@ class Board(Canvas):
                 self.color = "blue"
             
             self.checkWin()
-        
+    
+    def tallyWin(self, color):
+        if color == "red":
+            global redWins
+            redWins += 1
+            redWinsLabel.config(text=redWinsText + str(redWins))
+        if color == "blue":
+            global blueWins
+            blueWins += 1
+            blueWinsLabel.config(text=blueWinsText + str(blueWins))
+
     def checkWin(self):
-        # Horizontal
+        # horizontal
         for row in range(len(self.positions)):
             for column in range(4):
                 horizontalFourInARow = self.positions[row][column].color == self.positions[row][column+1].color == self.positions[row][column+2].color == self.positions[row][column+3].color
                 horizontalWinCondition = horizontalFourInARow and self.positions[row][column].color != "white"
                 if(horizontalWinCondition):
                     gameDetails.text.config(text=self.positions[row][column].color + " wins!")
-        # Vertical
+                    self.tallyWin(self.positions[row][column].color)
+                    self.turn = False
+                    return
+                    
+        # vertical
         for row in range(3):
             for column in range(len(self.positions[0])):
                 verticalFourInARow = self.positions[row][column].color == self.positions[row+1][column].color == self.positions[row+2][column].color == self.positions[row+3][column].color
                 verticalWinCondition = verticalFourInARow and self.positions[row][column].color != "white"
                 if(verticalWinCondition):
                     gameDetails.text.config(text=self.positions[row][column].color + " wins!")
+                    self.tallyWin(self.positions[row][column].color)
+                    self.turn = False
+                    return
+
         # upDownDiagonal
         for row in range(3):
             for column in range(4):
@@ -146,6 +187,10 @@ class Board(Canvas):
                 upDownDiagonalWinCondition = upDownDiagonalFourInARow and self.positions[row][column].color != "white"
                 if(upDownDiagonalWinCondition):
                     gameDetails.text.config(text=self.positions[row][column].color + " wins!")
+                    self.tallyWin(self.positions[row][column].color)
+                    self.turn = False
+                    return
+
         # downupdiagonal
         for row in range(3):
             for column in range(6,2,-1):
@@ -153,6 +198,20 @@ class Board(Canvas):
                 downupdiagonalWinCondition = downupdiagonalFourInARow and self.positions[row][column].color != "white"
                 if(downupdiagonalWinCondition):
                     gameDetails.text.config(text=self.positions[row][column].color + " wins!")
+                    self.tallyWin(self.positions[row][column].color)
+                    self.turn = False
+                    return
+
+        # tie game
+        for row in range(len(self.positions)):
+            for column in range(len(self.positions[0])):
+                if(self.positions[row][column].color == "white"):
+                    return
+        gameDetails.text.config(text="Tie Game!")
+        global ties
+        ties += 1
+        tiesLabel.config(text=tiesText + str(ties))
+        self.turn = False
 
     def checkThreeInARow(self, color):
         # upDownDiagonal
@@ -209,20 +268,25 @@ def restart():
     gameDetails = GameDetails(root)
     gameDetails.grid(row=0, column=0)
 
-    board = Board(root)
-    board.grid(row=3, column=0)
+    board = Board(boardFrame)
+    board.grid(row=90, column=0)
+
+    startButton = Button(root, text="Start AI Battle!")
+    startButton.bind("<Button-1>", board.startAIGame)
+    startButton.grid(row=8, column=0)
     
 
 
 root = Tk()
-root.geometry("675x750")
+root.geometry("675x800")
 root.title("Connect 4")
 
 gameDetails = GameDetails(root)
 gameDetails.grid(row=0, column=0)
 
-board = Board(root)
-board.grid(row=3, column=0)
+boardFrame = Frame(root)
+board = Board(boardFrame)
+board.grid(row=90, column=0)
 
 gameMode = StringVar(root)
 options = ["Player", "Random AI", "Defense"]
@@ -230,6 +294,7 @@ gameMode.set(options[0])
 gameMode.trace("w", menuChange)
 selectionMenu = OptionMenu(root, gameMode, *options)
 selectionMenu.grid(row=1, column=0)
+selectionMenu.config(bg="BLUE")
 
 gameMode2 = StringVar(root)
 options2 = ["Player", "Random AI", "Defense"]
@@ -237,5 +302,23 @@ gameMode2.set(options2[0])
 gameMode2.trace("w", menuChange)
 selectionMenu2 = OptionMenu(root, gameMode2, *options2)
 selectionMenu2.grid(row=2, column=0)
+selectionMenu2.config(bg="RED")
+
+blueWinsLabel = Label(root, text=blueWinsText + str(blueWins))
+redWinsLabel = Label(root, text=redWinsText + str(redWins))
+tiesLabel = Label(root, text=tiesText + str(ties))
+
+blueWinsLabel.grid(row=5, column=0)
+redWinsLabel.grid(row=6, column=0)
+tiesLabel.grid(row=7, column=0)
+
+numGames = Entry(root)
+numGames.grid(row=8, column=0)
+
+startButton = Button(root, text="Start AI Battle!")
+startButton.bind("<Button-1>", board.startAIGame)
+startButton.grid(row=9, column=0)
+
+
 
 root.mainloop()
