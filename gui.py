@@ -62,11 +62,15 @@ class Board(Canvas):
                 self.setAIPiece()
             if gameMode.get() == options[2]: # Defense
                 self.setDefenseAIPiece()
+            if gameMode.get() == options[3]: # Defense Aggro
+                self.setDefenseAgroAIPiece()
 
             if gameMode2.get() == options2[1]: # Random AI
                 self.setAIPiece()
             if gameMode2.get() == options2[2]: # Defense
                 self.setDefenseAIPiece()
+            if gameMode2.get() == options2[3]: # Defense Aggro
+                self.setDefenseAgroAIPiece()  
 
     def setPiece(self, event):
         if self.turn:
@@ -77,6 +81,8 @@ class Board(Canvas):
                 self.setAIPiece()
             if gameMode.get() == options[2]: # Defense
                 self.setDefenseAIPiece()
+            if gameMode.get() == options[3]: # Defense Aggro
+                self.setDefenseAgroAIPiece()
 
             if gameMode2.get() == options2[0]: # Player
                 column = int(event.x/100) # integer divide to get column
@@ -85,7 +91,25 @@ class Board(Canvas):
                 self.setAIPiece()
             if gameMode2.get() == options2[2]: # Defense
                 self.setDefenseAIPiece()
+            if gameMode2.get() == options2[3]: # Defense Aggro
+                self.setDefenseAgroAIPiece()    
     
+    def setDefenseAgroAIPiece(self):
+        column = self.checkThreeInARow("blue" if self.color=="red" else "red")
+        noThreeInARow = 9000
+
+        if(column == noThreeInARow):
+            column = self.checkThreeInARow(self.color)
+            print("AGGRO: " + str(column))
+        else:
+            print("CheckThreeInARow: " + str(column))
+
+        if(column == noThreeInARow):
+            column = random.randint(0,6)
+
+        self.placePiece(column, "AI")
+
+
     def setDefenseAIPiece(self):
         column = self.checkThreeInARow("blue" if self.color=="red" else "red")
         noThreeInARow = 9000
@@ -298,15 +322,15 @@ board = Board(boardFrame)
 board.grid(row=90, column=0)
 
 gameMode = StringVar(root)
-options = ["Player", "Random AI", "Defense"]
-gameMode.set(options[2])
+options = ["Player", "Random AI", "Defense", "Defense Agro"]
+gameMode.set(options[3])
 gameMode.trace("w", menuChange)
 selectionMenu = OptionMenu(root, gameMode, *options)
 selectionMenu.grid(row=1, column=0)
 selectionMenu.config(bg="BLUE")
 
 gameMode2 = StringVar(root)
-options2 = ["Player", "Random AI", "Defense"]
+options2 = ["Player", "Random AI", "Defense", "Defence Agro"]
 gameMode2.set(options2[1])
 gameMode2.trace("w", menuChange)
 selectionMenu2 = OptionMenu(root, gameMode2, *options2)
