@@ -1,4 +1,5 @@
 import random
+import time
 
 from time import sleep
 
@@ -11,10 +12,15 @@ windowHeight = 600
 blueWins = 0
 redWins = 0
 ties = 0
+evaluatedMoves = 0
+countColor = "blue"
 
 blueWinsText = "Blue Wins: " 
 redWinsText = "Red Wins: " 
 tiesText = "Ties: "
+evaluatedMovesText = "Evaluated Moves: "
+timeText = "Total Time: "
+movesOverTimeText = "Moves/Second: "
 
 class GameDetails(Frame):
     def __init__(self, master):
@@ -105,6 +111,7 @@ class Board(Canvas):
     def setMobileDefenseAgroAIPiece(self):
         column = self.checkThreeInARow("blue" if self.color=="red" else "red")
         noThreeInARow = 9000
+        global evaluatedMoves
 
         if(column == noThreeInARow):
             column = self.checkThreeInARow(self.color)
@@ -117,6 +124,8 @@ class Board(Canvas):
             print("MOBILE: " + str(column))
 
         if(column == noThreeInARow):
+            if self.color == countColor:
+                evaluatedMoves += 1
             column = random.randint(0,6)
 
         self.placePiece(column, "AI")
@@ -124,6 +133,7 @@ class Board(Canvas):
     def setDefenseAgroAIPiece(self):
         column = self.checkThreeInARow("blue" if self.color=="red" else "red")
         noThreeInARow = 9000
+        global evaluatedMoves
 
         if(column == noThreeInARow):
             column = self.checkThreeInARow(self.color)
@@ -132,6 +142,8 @@ class Board(Canvas):
             print("CheckThreeInARow: " + str(column))
 
         if(column == noThreeInARow):
+            if self.color == countColor:
+                evaluatedMoves += 1
             column = random.randint(0,6)
 
         self.placePiece(column, "AI")
@@ -140,8 +152,11 @@ class Board(Canvas):
     def setDefenseAIPiece(self):
         column = self.checkThreeInARow("blue" if self.color=="red" else "red")
         noThreeInARow = 9000
+        global evaluatedMoves
 
         if(column == noThreeInARow):
+            if self.color == countColor:
+                evaluatedMoves += 1
             column = random.randint(0,6)
         else:
             print("CheckThreeInARow: " + str(column))
@@ -151,6 +166,9 @@ class Board(Canvas):
 
     def setAIPiece(self):
         column = random.randint(0,6)
+        global evaluatedMoves
+        if self.color == countColor:
+                evaluatedMoves += 1
         print("AI placed piece in column: " + str(column+1))
         self.placePiece(column, "AI")
 
@@ -264,9 +282,12 @@ class Board(Canvas):
         self.turn = False
 
     def checkThreeInARow(self, color):
+        global evaluatedMoves
         # upDownDiagonal
         for row in range(3):
             for column in range(4):
+                if self.color == countColor:
+                    evaluatedMoves += 1
                 upDownDiagonalFourInARow = self.positions[row+3][column+3].color == self.positions[row+1][column+1].color == self.positions[row+2][column+2].color
                 upDownDiagonalWinCondition = upDownDiagonalFourInARow and self.positions[row+3][column+3].color == color
                 if(upDownDiagonalWinCondition and self.positions[row][column].color == "white" and self.positions[row+1][column].color != "white"):
@@ -275,6 +296,8 @@ class Board(Canvas):
         # downupdiagonal
         for row in range(3):
             for column in range(6,2,-1):
+                if self.color == countColor:
+                    evaluatedMoves += 1
                 downupdiagonalFourInARow = self.positions[row+3][column-3].color == self.positions[row+1][column-1].color == self.positions[row+2][column-2].color
                 downupdiagonalWinCondition = downupdiagonalFourInARow and self.positions[row+3][column-3].color == color
                 if(downupdiagonalWinCondition and self.positions[row][column].color == "white" and self.positions[row+1][column].color != "white"):
@@ -284,6 +307,8 @@ class Board(Canvas):
         # Vertical
         for row in range(3):
             for column in range(len(self.positions[0])):
+                if self.color == countColor:
+                    evaluatedMoves += 1
                 verticalFourInARow = self.positions[row+1][column].color == self.positions[row+2][column].color == self.positions[row+3][column].color
                 verticalWinCondition = verticalFourInARow and self.positions[row+3][column].color == color
                 if(verticalWinCondition and self.positions[row][column].color == "white"):
@@ -293,6 +318,8 @@ class Board(Canvas):
         # Horizontal
         for row in range(len(self.positions)):
             for column in range(5):
+                if self.color == countColor:
+                    evaluatedMoves += 1
                 horizontalFourInARow = self.positions[row][column].color == self.positions[row][column+1].color 
                 horizontalWinCondition = horizontalFourInARow and self.positions[row][column].color == color
                 if horizontalWinCondition and self.positions[row][column+2].color == "white":
@@ -310,7 +337,10 @@ class Board(Canvas):
 
     def getRowNumberForColumn(self, column):
         row = 0
+        global evaluatedMoves
         while row < len(self.positions):
+            if self.color == countColor:
+                evaluatedMoves += 1
             # Full column condition
             if self.positions[0][column].color == "red" or self.positions[0][column].color == "blue": 
                 return -1
@@ -328,29 +358,27 @@ class Board(Canvas):
                 row += 1
 
     def mobileMove(self):
+        global evaluatedMoves
         validMoves = []
         moveScores = [0,0,0,0,0,0,0]
         for column in range(len(self.positions[0])):
             validMoves.append(self.getRowNumberForColumn(column))
-        print(validMoves)
 
         for column in range(len(validMoves)):
+            if self.color == countColor:
+                evaluatedMoves += 1
             if validMoves[column] > 0:
                 leftMoveIndex = column-1
                 rightMoveIndex = column+1
                 verticalMoveIndex = validMoves[column]-1
                 
                 if leftMoveIndex >= 0:
-                    print("LEFT")
                     moveScores[column] += 1
                 if rightMoveIndex <= 6:
-                    print("RIGHT")
                     moveScores[column] += 1
                 if verticalMoveIndex >= 0:
-                    print("VERTICAL")
                     moveScores[column] += 1
         
-        print(moveScores)
         return max(moveScores)
 
 
@@ -371,21 +399,28 @@ def restart():
     board.grid(row=90, column=0)
 
 def resetGlobals():
-    global redWins, blueWins, ties
+    global redWins, blueWins, ties, evaluatedMoves
     redWins = 0
     blueWins = 0
     ties = 0
+    evaluatedMoves = 0
 
 def startAIGame(*args):
     resetGlobals()
+    t0 = time.time()
     for game in range(int(numGames.get())):
         board.startAIGame()
         restart()
+    t1 = time.time()
+    totalTime = t1 - t0
     print(str(int(numGames.get())) + " Games Finished")
+    evaluatedMovesLabel.config(text=evaluatedMovesText + str(evaluatedMoves))
+    timeLabel.config(text=timeText+str(totalTime)+" seconds")
+    movesOverTimeLabel.config(text=movesOverTimeText+str(evaluatedMoves/totalTime)+" moves/sec")
 
 
 root = Tk()
-root.geometry("675x850")
+root.geometry("675x950")
 root.title("Connect 4")
 
 gameDetails = GameDetails(root)
@@ -426,6 +461,13 @@ startButton = Button(root, text="Start AI Battle!")
 startButton.bind("<Button-1>", startAIGame)
 startButton.grid(row=9, column=0)
 
+evaluatedMovesLabel = Label(root, text=evaluatedMovesText + str(evaluatedMoves))
+evaluatedMovesLabel.grid(row=10, column=0)
 
+timeLabel = Label(root, text=timeText + str(0) + " seconds")
+timeLabel.grid(row=11, column=0)
+
+movesOverTimeLabel = Label(root, text=movesOverTimeText + str(0))
+movesOverTimeLabel.grid(row=12, column=0)
 
 root.mainloop()
