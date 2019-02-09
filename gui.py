@@ -64,6 +64,8 @@ class Board(Canvas):
                 self.setDefenseAIPiece()
             if gameMode.get() == options[3]: # Defense Aggro
                 self.setDefenseAgroAIPiece()
+            if gameMode.get() == options[4]: # Mobile Defense Aggro
+                self.setMobileDefenseAgroAIPiece()
 
             if gameMode2.get() == options2[1]: # Random AI
                 self.setAIPiece()
@@ -71,6 +73,8 @@ class Board(Canvas):
                 self.setDefenseAIPiece()
             if gameMode2.get() == options2[3]: # Defense Aggro
                 self.setDefenseAgroAIPiece()  
+            if gameMode2.get() == options2[4]: # Mobile Defense Aggro
+                self.setMobileDefenseAgroAIPiece()
 
     def setPiece(self, event):
         if self.turn:
@@ -83,6 +87,8 @@ class Board(Canvas):
                 self.setDefenseAIPiece()
             if gameMode.get() == options[3]: # Defense Aggro
                 self.setDefenseAgroAIPiece()
+            if gameMode.get() == options[4]: # Mobile Defense Aggro
+                self.setMobileDefenseAgroAIPiece()
 
             if gameMode2.get() == options2[0]: # Player
                 column = int(event.x/100) # integer divide to get column
@@ -93,7 +99,28 @@ class Board(Canvas):
                 self.setDefenseAIPiece()
             if gameMode2.get() == options2[3]: # Defense Aggro
                 self.setDefenseAgroAIPiece()    
+            if gameMode2.get() == options2[4]: # Mobile Defense Aggro
+                self.setMobileDefenseAgroAIPiece()
     
+    def setMobileDefenseAgroAIPiece(self):
+        column = self.checkThreeInARow("blue" if self.color=="red" else "red")
+        noThreeInARow = 9000
+
+        if(column == noThreeInARow):
+            column = self.checkThreeInARow(self.color)
+            print("AGGRO: " + str(column))
+        else:
+            print("CheckThreeInARow: " + str(column))
+
+        if(column == noThreeInARow):
+            column = self.mobileMove()
+            print("MOBILE: " + str(column))
+
+        if(column == noThreeInARow):
+            column = random.randint(0,6)
+
+        self.placePiece(column, "AI")
+
     def setDefenseAgroAIPiece(self):
         column = self.checkThreeInARow("blue" if self.color=="red" else "red")
         noThreeInARow = 9000
@@ -178,7 +205,7 @@ class Board(Canvas):
         elif color == "blue":
             global blueWins
             blueWins += 1
-            blueWinsLabel.config(text=blueWinsText + str(blueWins/2))
+            blueWinsLabel.config(text=blueWinsText + str(int(blueWins/2)))
 
     def checkWin(self):
         # horizontal
@@ -281,9 +308,56 @@ class Board(Canvas):
 
         return 9000
 
+    def getRowNumberForColumn(self, column):
+        row = 0
+        while row < len(self.positions):
+            # Full column condition
+            if self.positions[0][column].color == "red" or self.positions[0][column].color == "blue": 
+                return -1
+            
+            # If there exits a piece in the column, place the next piece above it
+            if self.positions[row][column].color == "red" or self.positions[row][column].color == "blue":
+                return row-1
+            
+            # If there is no piece in the column, place it in the first spot
+            elif row == len(self.positions) - 1:
+                return row
+
+            # No open spot? Increment to find it
+            if self.positions[row][column].color != "red" and self.positions[row][column].color != "blue":
+                row += 1
+
+    def mobileMove(self):
+        validMoves = []
+        moveScores = [0,0,0,0,0,0,0]
+        for column in range(len(self.positions[0])):
+            validMoves.append(self.getRowNumberForColumn(column))
+        print(validMoves)
+
+        for column in range(len(validMoves)):
+            if validMoves[column] > 0:
+                leftMoveIndex = column-1
+                rightMoveIndex = column+1
+                verticalMoveIndex = validMoves[column]-1
+                
+                if leftMoveIndex >= 0:
+                    print("LEFT")
+                    moveScores[column] += 1
+                if rightMoveIndex <= 6:
+                    print("RIGHT")
+                    moveScores[column] += 1
+                if verticalMoveIndex >= 0:
+                    print("VERTICAL")
+                    moveScores[column] += 1
+        
+        print(moveScores)
+        return max(moveScores)
+
+
+
 
 def menuChange(*args):
-    print("090909")
+    print("menu change")
     # restart()
 
 def restart():
@@ -322,7 +396,7 @@ board = Board(boardFrame)
 board.grid(row=90, column=0)
 
 gameMode = StringVar(root)
-options = ["Player", "Random AI", "Defense", "Defense Agro"]
+options = ["Player", "Random AI", "Defense", "Defense Agro", "Mobile Defense Agro"]
 gameMode.set(options[3])
 gameMode.trace("w", menuChange)
 selectionMenu = OptionMenu(root, gameMode, *options)
@@ -330,7 +404,7 @@ selectionMenu.grid(row=1, column=0)
 selectionMenu.config(bg="BLUE")
 
 gameMode2 = StringVar(root)
-options2 = ["Player", "Random AI", "Defense", "Defence Agro"]
+options2 = ["Player", "Random AI", "Defense", "Defence Agro", "Mobile Defense Agro"]
 gameMode2.set(options2[1])
 gameMode2.trace("w", menuChange)
 selectionMenu2 = OptionMenu(root, gameMode2, *options2)
