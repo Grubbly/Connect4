@@ -63,6 +63,10 @@ class Board(Canvas):
         self.bind("<Button-1>", self.setPiece)
 
     def startAIGame(self):
+        if gameMode.get() == options[0] or gameMode2.get() == options2[0]:
+            print("Click the board to start playing!")
+            return
+
         while self.turn:
             if gameMode.get() == options[1]: # Random AI
                 self.setAIPiece()
@@ -406,6 +410,13 @@ def resetGlobals():
     evaluatedMoves = 0
 
 def startAIGame(*args):
+    if gameMode.get() == options[0] or gameMode2.get() == options2[0]:
+        print("Click the board to start playing!")
+        return
+    
+    if type(int(numGames.get())) is not int or int(numGames.get()) <= 0:
+        return
+
     resetGlobals()
     t0 = time.time()
     for game in range(int(numGames.get())):
@@ -440,7 +451,7 @@ selectionMenu.config(bg="BLUE")
 
 gameMode2 = StringVar(root)
 options2 = ["Player", "Random AI", "Defense", "Defence Agro", "Mobile Defense Agro"]
-gameMode2.set(options2[1])
+gameMode2.set(options2[2])
 gameMode2.trace("w", menuChange)
 selectionMenu2 = OptionMenu(root, gameMode2, *options2)
 selectionMenu2.grid(row=2, column=0)
@@ -455,6 +466,7 @@ redWinsLabel.grid(row=6, column=0)
 tiesLabel.grid(row=7, column=0)
 
 numGames = Entry(root)
+numGames.insert(0,0)
 numGames.grid(row=8, column=0)
 
 startButton = Button(root, text="Start AI Battle!")
