@@ -24,10 +24,10 @@ movesOverTimeText = "Moves/Second: "
 
 class GameDetails(Frame):
     def __init__(self, master):
-        Frame.__init__(self, master=root, bg="green")
+        Frame.__init__(self, master=root)
         self.configure(width=500, height=100) 
         self.text = Label(self, text="Connect 4", font=font.Font(self, size=22, family='Arial'), background="green")
-        self.author = Label(self, text="Tristan Van Cise", font=font.Font(self, size=12, family='Arial'), background="green")
+        self.author = Label(self, text="Tristan Van Cise", font=font.Font(self, size=12, family='Arial'))
         self.text.grid(sticky=W, pady=20)
         self.author.grid(sticky=N)
 
@@ -450,7 +450,7 @@ selectionMenu.grid(row=1, column=0)
 selectionMenu.config(bg="BLUE")
 
 gameMode2 = StringVar(root)
-options2 = ["Player", "Random AI", "Defense", "Defence Agro", "Mobile Defense Agro"]
+options2 = ["", "Random AI", "Defense", "Defence Agro", "Mobile Defense Agro"]
 gameMode2.set(options2[2])
 gameMode2.trace("w", menuChange)
 selectionMenu2 = OptionMenu(root, gameMode2, *options2)
