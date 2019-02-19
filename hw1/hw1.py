@@ -78,6 +78,9 @@ class Board(Canvas):
             if gameMode.get() == options[4]: # Mobile Defense Aggro
                 self.setMobileDefenseAgroAIPiece()
 
+            if not self.turn:
+                break
+
             if gameMode2.get() == options2[1]: # Random AI
                 self.setAIPiece()
             if gameMode2.get() == options2[2]: # Defense
@@ -104,6 +107,7 @@ class Board(Canvas):
             if gameMode.get() == options[4]: # Mobile Defense Aggro
                 self.setMobileDefenseAgroAIPiece()
 
+        if self.turn:
             if gameMode2.get() == options2[0]: # Player
                 column = int(event.x/100) # integer divide to get column
                 self.placePiece(column, "player")
@@ -141,7 +145,7 @@ class Board(Canvas):
         self.placePiece(column, "AI")
 
     def testDFSDepth2(self):
-        column = self.mobileMoveHeuristic()
+        column = self.mobileMoveHeuristic(self.positions)
         print("DFS column: " + str(column))
         self.placePiece(column, "AI")
 
@@ -251,19 +255,19 @@ class Board(Canvas):
             while row < len(positions):
                 # Full column condition
                 if positions[0][column].color == "red" or positions[0][column].color == "blue": 
-                    print("COLUMN ", column, " FULL")
+                    # print("COLUMN ", column, " FULL")
                     return positions, -1
                 
                 # If there exits a piece in the column, place the next piece above it
                 if positions[row][column].color == "red" or positions[row][column].color == "blue":
-                    print("PREDICTION Piece Placed: (" + str(column) + ", " + str(row) + ")")
+                    # print("PREDICTION Piece Placed: (" + str(column) + ", " + str(row) + ")")
                     positions[row-1][column].switchColor(self.color)
                     placedRow = row-1
                     break
                 
                 # If there is no piece in the column, place it in the first spot
                 elif row == len(positions) - 1:
-                    print("TEST Piece Placed: (" + str(column) + ", " + str(row) + ")")
+                    # print("TEST Piece Placed: (" + str(column) + ", " + str(row) + ")")
                     positions[row][column].switchColor(self.color)
                     placedRow = row
                     break
@@ -444,12 +448,12 @@ class Board(Canvas):
 
         return max(moveScores)
 
-    def mobileMoveHeuristic(self):
+    def mobileMoveHeuristic(self, rootPositions, depth=0):
         global evaluatedMoves
         validMoves = []
         moveScores = [0,0,0,0,0,0,0]
-        for column in range(len(self.positions[0])):
-            validMoves.append(self.getRowNumberForColumn(column, self.positions))
+        for column in range(len(rootPositions[0])):
+            validMoves.append(self.getRowNumberForColumn(column, rootPositions))
 
         # Score the immediate next move
         # Add these values to the move score 
@@ -482,7 +486,7 @@ class Board(Canvas):
         # valid move. Subtract these from the move score
         # to minimize the value of the player's next move.
         for column in range(len(validMoves)):
-            positions = self.positions
+            positions = rootPositions
             positions, placedRow = self.testPlacePiece(column, positions, "null")
 
             if placedRow < 0:
@@ -491,6 +495,8 @@ class Board(Canvas):
 
             playerValidMoves = []
             for playerColumn in range(len(positions[0])):
+                if self.color == countColor:
+                    evaluatedMoves += 1
                 playerValidMoves.append(self.getRowNumberForColumn(playerColumn, positions))
 
             for playerColumn in range(len(playerValidMoves)):
@@ -513,10 +519,10 @@ class Board(Canvas):
             # the best move (in terms of the heuristic) that the AI can
             # make with a depth of 2.
             positions[placedRow][column].switchColor("white")
-            print("Switched: (", column ,  ", ", placedRow, ")")
+            # print("Switched: (", column ,  ", ", placedRow, ")")
             moveScores[column] += max(playerValidMoves)
 
-        print(moveScores)
+        print("Column score evaluations: ", moveScores)
         return moveScores.index(max(moveScores))
 
 def menuChange(*args):
