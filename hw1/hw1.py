@@ -134,6 +134,26 @@ class Board(Canvas):
 
         self.placePiece(column, "AI")
 
+    def testDFSDepth2(self):
+        column = self.mobileMove()
+        print("DFS column: " + column)
+        self.placePiece(column, "AI")
+
+    def BFS(self, s): 
+        visited = [False] * (len(self.graph)) 
+        queue = [] 
+        queue.append(s) 
+        visited[s] = True
+  
+        while queue: 
+            s = queue.pop(0) 
+            print (s, end = " ") 
+
+            for i in self.graph[s]: 
+                if visited[i] == False: 
+                    queue.append(i) 
+                    visited[i] = True
+
     def setDefenseAgroAIPiece(self):
         column = self.checkThreeInARow("blue" if self.color=="red" else "red")
         noThreeInARow = 9000
@@ -176,11 +196,11 @@ class Board(Canvas):
         print("AI placed piece in column: " + str(column+1))
         self.placePiece(column, "AI")
 
-    def placePiece(self, column, type="player"):
+    def placePiece(self, column, type="player", positions=self.positions):
             row = 0
-            while row < len(self.positions):
+            while row < len(positions):
                 # Full column condition
-                if self.positions[0][column].color == "red" or self.positions[0][column].color == "blue": 
+                if positions[0][column].color == "red" or positions[0][column].color == "blue": 
                     if(type == "AI"):
                         print("Bad AI move generated, regenerating...")
                         self.setAIPiece()
@@ -190,19 +210,19 @@ class Board(Canvas):
                     return
                 
                 # If there exits a piece in the column, place the next piece above it
-                if self.positions[row][column].color == "red" or self.positions[row][column].color == "blue":
+                if positions[row][column].color == "red" or positions[row][column].color == "blue":
                     print("Piece Placed: (" + str(column) + ", " + str(row) + ")")
-                    self.positions[row-1][column].switchColor(self.color)
+                    positions[row-1][column].switchColor(self.color)
                     break
                 
                 # If there is no piece in the column, place it in the first spot
-                elif row == len(self.positions) - 1:
+                elif row == len(positions) - 1:
                     print("Piece Placed: (" + str(column) + ", " + str(row) + ")")
-                    self.positions[row][column].switchColor(self.color)
+                    positions[row][column].switchColor(self.color)
                     break
 
                 # No open spot? Increment to find it
-                if self.positions[row][column].color != "red" and self.positions[row][column].color != "blue":
+                if positions[row][column].color != "red" and positions[row][column].color != "blue":
                     row += 1
 
             # Change turns:
@@ -219,6 +239,37 @@ class Board(Canvas):
             
             self.checkWin()
     
+    def testPlacePiece(self, column, type="player", positions=self.positions):
+            row = 0
+            while row < len(positions):
+                # Full column condition
+                if positions[0][column].color == "red" or positions[0][column].color == "blue": 
+                    if(type == "AI"):
+                        print("Bad AI move generated, regenerating...")
+                        self.setAIPiece()
+                    else:
+                        # TODO: Label this on GUI
+                        print("Bad player move")
+                    return
+                
+                # If there exits a piece in the column, place the next piece above it
+                if positions[row][column].color == "red" or positions[row][column].color == "blue":
+                    print("Piece Placed: (" + str(column) + ", " + str(row) + ")")
+                    positions[row-1][column].switchColor(self.color)
+                    break
+                
+                # If there is no piece in the column, place it in the first spot
+                elif row == len(positions) - 1:
+                    print("Piece Placed: (" + str(column) + ", " + str(row) + ")")
+                    positions[row][column].switchColor(self.color)
+                    break
+
+                # No open spot? Increment to find it
+                if positions[row][column].color != "red" and positions[row][column].color != "blue":
+                    row += 1
+
+            return positions
+
     def tallyWin(self, color):
         if color == "red":
             global redWins
@@ -339,26 +390,26 @@ class Board(Canvas):
 
         return 9000
 
-    def getRowNumberForColumn(self, column):
+    def getRowNumberForColumn(self, column, positions=self.positions):
         row = 0
         global evaluatedMoves
-        while row < len(self.positions):
+        while row < len(positions):
             if self.color == countColor:
                 evaluatedMoves += 1
             # Full column condition
-            if self.positions[0][column].color == "red" or self.positions[0][column].color == "blue": 
-                return -1
+            if positions[0][column].color == "red" or positions[0][column].color == "blue": 
+                return -9000
             
             # If there exits a piece in the column, place the next piece above it
-            if self.positions[row][column].color == "red" or self.positions[row][column].color == "blue":
+            if positions[row][column].color == "red" or positions[row][column].color == "blue":
                 return row-1
             
             # If there is no piece in the column, place it in the first spot
-            elif row == len(self.positions) - 1:
+            elif row == len(positions) - 1:
                 return row
 
             # No open spot? Increment to find it
-            if self.positions[row][column].color != "red" and self.positions[row][column].color != "blue":
+            if positions[row][column].color != "red" and positions[row][column].color != "blue":
                 row += 1
 
     def mobileMove(self):
@@ -368,6 +419,10 @@ class Board(Canvas):
         for column in range(len(self.positions[0])):
             validMoves.append(self.getRowNumberForColumn(column))
 
+        # Score the immediate next move
+        # Add these values to the move score 
+        # because we want to maximize the value
+        # of the AI's next move.
         for column in range(len(validMoves)):
             if self.color == countColor:
                 evaluatedMoves += 1
@@ -382,10 +437,47 @@ class Board(Canvas):
                     moveScores[column] += 1
                 if verticalMoveIndex >= 0:
                     moveScores[column] += 1
+
+                # Can an enemy three in a row be block? If so, weight this heavily
+                if self.checkThreeInARow("blue" if self.color=="red" else "red") == column:
+                    moveScores[column] += 5
+
+                # Can we win this turn?
+                self.checkThreeInARow(self.color) == column:
+                    moveScores[column] += 10
         
+        # Generate the move set for the enemy for each
+        # valid move. Subtract these from the move score
+        # to minimize the value of the player's next move.
+        for column in range(len(validMoves)):
+            positions = self.positions
+            positions = self.testPlacePiece(column, "null", positions)
+            playerValidMoves = []
+            for playerColumn in range(len(positions[0])):
+                playerValidMoves.append(self.getRowNumberForColumn(playerColumn, positions))
+
+            for playerColumn in range(len(playerValidMoves)):
+                if self.color == countColor:
+                    evaluatedMoves += 1
+                if validMoves[column] > 0:
+                    leftMoveIndex = column-1
+                    rightMoveIndex = column+1
+                    verticalMoveIndex = validMoves[column]-1
+                    
+                    if leftMoveIndex >= 0:
+                        moveScores[column] -= 1
+                    if rightMoveIndex <= 6:
+                        moveScores[column] -= 1
+                    if verticalMoveIndex >= 0:
+                        moveScores[column] -= 1
+
+            # Subtract the best move the player could make from the
+            # score of the AI's best move. The net value will represent
+            # the best move (in terms of the heuristic) that the AI can
+            # make with a depth of 2.
+            moveScores[column] += max(playerValidMoves)
+
         return max(moveScores)
-
-
 
 
 def menuChange(*args):
