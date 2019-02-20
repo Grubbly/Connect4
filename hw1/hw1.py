@@ -448,7 +448,88 @@ class Board(Canvas):
 
         return max(moveScores)
 
-    def mobileMoveHeuristic(self, rootPositions, depth=0):
+    def recurse(self, rootPositions, score, depth):
+        if depth == 0:
+            return score
+
+        moveScores = [0,0,0,0,0,0,0]
+        validMoves = []
+        for column in range(len(rootPositions[0])):
+            validMoves.append(self.getRowNumberForColumn(column, rootPositions))
+
+        for column in range(len(validMoves)):
+            if self.color == countColor:
+                evaluatedMoves += 1
+            if validMoves[column] > 0:
+                leftMoveIndex = column-1
+                rightMoveIndex = column+1
+                verticalMoveIndex = validMoves[column]-1
+                
+                if leftMoveIndex >= 0:
+                    moveScores[column] += 1
+                if rightMoveIndex <= 6:
+                    moveScores[column] += 1
+                if verticalMoveIndex >= 0:
+                    moveScores[column] += 1
+
+                # Can an enemy three in a row be block? If so, weight this heavily
+                if self.checkThreeInARow("blue" if self.color=="red" else "red") == column:
+                    moveScores[column] += 5
+
+                # Can we win this turn?
+                if self.checkThreeInARow(self.color) == column:
+                    moveScores[column] += 10
+
+        for column in range(len(validMoves)):
+            positions = rootPositions
+            positions, placedRow = self.testPlacePiece(column, positions, "null")
+
+            if placedRow < 0:
+                moveScores[column] = -9000
+                continue
+
+            playerValidMoves = []
+            for playerColumn in range(len(positions[0])):
+                if self.color == countColor:
+                    evaluatedMoves += 1
+                playerValidMoves.append(self.getRowNumberForColumn(playerColumn, positions))
+
+            for playerColumn in range(len(playerValidMoves)):
+                if self.color == countColor:
+                    evaluatedMoves += 1
+                if validMoves[column] > 0:
+                    leftMoveIndex = column-1
+                    rightMoveIndex = column+1
+                    verticalMoveIndex = validMoves[column]-1
+                    
+                    if leftMoveIndex >= 0:
+                        moveScores[column] -= 1./21
+                    if rightMoveIndex <= 6:
+                        moveScores[column] -= 1./21
+                    if verticalMoveIndex >= 0:
+                        moveScores[column] -= 1./21
+
+            # Subtract the best move the player could make from the
+            # score of the AI's best move. The net value will represent
+            # the best move (in terms of the heuristic) that the AI can
+            # make with a depth of 2.
+            moveScores[column] += max(playerValidMoves)
+            score += self.recurse(positions, moveScores[column], depth-1)
+            positions[placedRow][column].switchColor("white")
+            # print("Switched: (", column ,  ", ", placedRow, ")")
+        return score
+
+    def mobileMoveHeuristic2(self, rootPositions, depth=1):
+        global evaluatedMoves
+        validMoves = []
+        moveScores = [0,0,0,0,0,0,0]
+        for column in range(len(rootPositions[0])):
+            moveScores[column] = self.recurse(rootPositions, moveScores[column], 3)
+
+        print("Column score evaluations: ", moveScores)
+        return moveScores.index(max(moveScores))
+
+    def mobileMoveHeuristic(self, rootPositions, depth=1):
         global evaluatedMoves
         validMoves = []
         moveScores = [0,0,0,0,0,0,0]
