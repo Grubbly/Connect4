@@ -519,12 +519,12 @@ class Board(Canvas):
             # the best move (in terms of the heuristic) that the AI can
             # make with a depth of 2.
             score += min(playerValidMoves)
-            # score += self.recurse(positions, column, score, depth-1)
+            score += self.recurse(positions, playerColumn, score, depth-1)
             positions[placedRow][rootCol].switchColor("white")
             # print("Switched: (", column ,  ", ", placedRow, ")")
         return score
 
-    def mobileMoveHeuristic2(self, rootPositions, depth=1):
+    def mobileMoveHeuristic2(self, rootPositions, depth=10):
         global evaluatedMoves
         validMoves = []
         moveScores = [0,0,0,0,0,0,0]
