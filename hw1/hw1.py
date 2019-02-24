@@ -81,6 +81,7 @@ class Board(Canvas):
             if not self.turn:
                 break
 
+            print("AI Thinking...")
             if gameMode2.get() == options2[1]: # Random AI
                 self.setAIPiece()
             if gameMode2.get() == options2[2]: # Defense
@@ -108,6 +109,7 @@ class Board(Canvas):
                 self.setMobileDefenseAgroAIPiece()
 
         if self.turn:
+            print("AI Thinking...")
             if gameMode2.get() == options2[0]: # Player
                 column = int(event.x/100) # integer divide to get column
                 self.placePiece(column, "player")
@@ -146,23 +148,8 @@ class Board(Canvas):
 
     def testDFSDepth2(self):
         column = self.mobileMoveHeuristic2(self.positions)
-        print("DFS column: " + str(column))
+        print("DFS chose column: " + str(column))
         self.placePiece(column, "AI")
-
-    # def BFS(self, s): 
-    #     visited = [False] * (len(self.graph)) 
-    #     queue = [] 
-    #     queue.append(s) 
-    #     visited[s] = True
-  
-    #     while queue: 
-    #         s = queue.pop(0) 
-    #         print (s, end = " ") 
-
-    #         for i in self.graph[s]: 
-    #             if visited[i] == False: 
-    #                 queue.append(i) 
-    #                 visited[i] = True
 
     def setDefenseAgroAIPiece(self):
         column = self.checkThreeInARow("blue" if self.color=="red" else "red")
@@ -344,6 +331,7 @@ class Board(Canvas):
         tiesLabel.config(text=tiesText + str(ties))
         self.turn = False
 
+    # TODO LEFT HAND DETECTION
     def checkThreeInARow(self, color):
         global evaluatedMoves
         # upDownDiagonal
@@ -354,8 +342,20 @@ class Board(Canvas):
                 upDownDiagonalFourInARow = self.positions[row+3][column+3].color == self.positions[row+1][column+1].color == self.positions[row+2][column+2].color
                 upDownDiagonalWinCondition = upDownDiagonalFourInARow and self.positions[row+3][column+3].color == color
                 if(upDownDiagonalWinCondition and self.positions[row][column].color == "white" and self.positions[row+1][column].color != "white"):
-                    print("upDownDiagonal")
+                    # print("upDownDiagonal")
                     return column
+
+        # upDownDiagonal - COLUMN+3
+        for row in range(3):
+            for column in range(4):
+                if self.color == countColor:
+                    evaluatedMoves += 1
+                upDownDiagonalFourInARow = self.positions[row][column].color == self.positions[row+1][column+1].color == self.positions[row+2][column+2].color
+                upDownDiagonalWinCondition = upDownDiagonalFourInARow and self.positions[row][column].color == color
+                if(upDownDiagonalWinCondition and self.positions[row+3][column+3].color == "white" and self.positions[row+4 if row <= 1 else row+3][column+3].color != "white"):
+                    # print("upDownDiagonal - COLUMN+3")
+                    return column+3
+
         # downupdiagonal
         for row in range(3):
             for column in range(6,2,-1):
@@ -364,9 +364,21 @@ class Board(Canvas):
                 downupdiagonalFourInARow = self.positions[row+3][column-3].color == self.positions[row+1][column-1].color == self.positions[row+2][column-2].color
                 downupdiagonalWinCondition = downupdiagonalFourInARow and self.positions[row+3][column-3].color == color
                 if(downupdiagonalWinCondition and self.positions[row][column].color == "white" and self.positions[row+1][column].color != "white"):
-                    print("downUpDiagonal")
+                    # print("downUpDiagonal")
                     return column
         
+        # downupdiagonal - column-3 
+        # TOOO: DEBUG
+        for row in range(3):
+            for column in range(6,2,-1):
+                if self.color == countColor:
+                    evaluatedMoves += 1
+                downupdiagonalFourInARow = self.positions[row][column].color == self.positions[row+1][column-1].color == self.positions[row+2][column-2].color
+                downupdiagonalWinCondition = downupdiagonalFourInARow and self.positions[row][column].color == color
+                if(downupdiagonalWinCondition and self.positions[row+3][column-3].color == "white" and self.positions[row+4 if row <= 1 else row+3][column-3].color != "white"):
+                    # print("downUpDiagonal COLUMN-3")
+                    return column-3
+
         # Vertical
         for row in range(3):
             for column in range(len(self.positions[0])):
@@ -375,7 +387,7 @@ class Board(Canvas):
                 verticalFourInARow = self.positions[row+1][column].color == self.positions[row+2][column].color == self.positions[row+3][column].color
                 verticalWinCondition = verticalFourInARow and self.positions[row+3][column].color == color
                 if(verticalWinCondition and self.positions[row][column].color == "white"):
-                    print("vertical")
+                    # print("vertical")
                     return column
 
         # Horizontal
@@ -455,8 +467,6 @@ class Board(Canvas):
         if depth == 0:
             return score
 
-        moveScores = [0,0,0,0,0,0,0]
-        validMoves = []
         # REMOVE THIS LOOPING and pass column additionally
         rootRow = self.getRowNumberForColumn(rootCol, rootPositions)
         
@@ -476,14 +486,21 @@ class Board(Canvas):
                 score += 1
             if verticalMoveIndex >= 0:
                 score += 1
+            if verticalMoveIndex >= 0 and leftMoveIndex >= 0:
+                score += 1
+            if verticalMoveIndex >= 0 and rightMoveIndex <= 6:
+                score += 1
 
             # Can an enemy three in a row be block? If so, weight this heavily
             if self.checkThreeInARow("blue" if self.color=="red" else "red") == rootCol:
-                score += 5
+                score += 70 # WAS 5
 
             # Can we win this turn?
             if self.checkThreeInARow(self.color) == rootCol:
                 score += 10
+
+            if rootRow == 5: # WAS !here
+                score += 1.1 # WAS !here
 
         ## Start edits here!
         
@@ -508,31 +525,47 @@ class Board(Canvas):
                     verticalMoveIndex = playerValidMoves[playerColumn]-1
                     
                     if leftMoveIndex >= 0:
-                        score -= 1./21
+                        score += 1./21
                     if rightMoveIndex <= 6:
-                        score -= 1./21
+                        score += 1./21
                     if verticalMoveIndex >= 0:
-                        score -= 1./21
+                        score += 1./21
+                    if verticalMoveIndex >= 0 and leftMoveIndex >= 0:
+                        score += 1./21
+                    if verticalMoveIndex >= 0 and rightMoveIndex <= 6:
+                        score += 1./21
 
+                    if self.checkThreeInARow("blue" if self.color=="red" else "red") == playerColumn: # WAS !here
+                        score += 5 # WAS !here
+
+                    # if self.checkThreeInARow("blue" if self.color=="red" else "red") == playerColumn:
+                    #     score -= 1
+
+                positions, placedRowPlayer = self.testPlacePiece(playerColumn, positions, "null")
+                # score += 
+                self.recurse(positions, playerColumn, score, depth-1)
+                positions[placedRowPlayer][playerColumn].switchColor("white")
+
+            positions[placedRow][rootCol].switchColor("white")
             # Subtract the best move the player could make from the
             # score of the AI's best move. The net value will represent
             # the best move (in terms of the heuristic) that the AI can
             # make with a depth of 2.
-            score += min(playerValidMoves)
-            score += self.recurse(positions, playerColumn, score, depth-1)
-            positions[placedRow][rootCol].switchColor("white")
+            score += -min(playerValidMoves) #FLIP
             # print("Switched: (", column ,  ", ", placedRow, ")")
         return score
 
-    def mobileMoveHeuristic2(self, rootPositions, depth=10):
+    def mobileMoveHeuristic2(self, rootPositions, depth=5):
         global evaluatedMoves
-        validMoves = []
         moveScores = [0,0,0,0,0,0,0]
+        print("DFS DEPTH:", depth, "ply")
         for column in range(len(rootPositions[0])):
+            print("DFS evaluating column: ", column)
             moveScores[column] = self.recurse(rootPositions, column, moveScores[column], depth)
 
         print("Column score evaluations: ", moveScores)
-        return moveScores.index(max(moveScores))
+        indices = [i for i, x in enumerate(moveScores) if x == max(moveScores)]
+        return indices[len(indices)//2]
 
     def mobileMoveHeuristic(self, rootPositions, depth=1):
         global evaluatedMoves
@@ -676,7 +709,7 @@ selectionMenu.config(bg="BLUE")
 
 gameMode2 = StringVar(root)
 options2 = ["", "Random AI", "Defense", "Defence Agro", "Mobile Defense Agro", "DFS"]
-gameMode2.set(options2[2])
+gameMode2.set(options2[5])
 gameMode2.trace("w", menuChange)
 selectionMenu2 = OptionMenu(root, gameMode2, *options2)
 selectionMenu2.grid(row=2, column=0)
