@@ -589,7 +589,7 @@ class Simulation(Canvas):
 
     def senseDFS(self, rootPercepts, depth=1):
 
-        if type(int(dfsDepth.get())) is not int or int(dfsDepth.get()) <= 0:
+        if type(dfsDepth.get()) is not int or int(dfsDepth.get()) <= 0:
             print("INVALID DFS DEPTH")
             depth=5
         else:
