@@ -55,6 +55,7 @@ class Simulation(Canvas):
         self.color = "blue"
         self.percepts = []
         self.turn = True
+        self.randomCount = 0
 
         for row in range(0, windowHeight, int(windowHeight/6)):
             row_percepts = []
@@ -123,6 +124,13 @@ class Simulation(Canvas):
                 self.mobileDefenseAgroAgent()
             if gameMode2.get() == options2[5]: # DFS
                 self.DFSAgent()
+        
+        self.randomCount += 2
+
+        if self.randomCount == 4:
+            rmColumn = random.randint(0,6)
+            self.removeAction(rmColumn, self.percepts)
+            self.randomCount = 0
     
     def mobileDefenseAgroAgent(self):
         column = self.senseThreeInARow("blue" if self.color=="red" else "red")
@@ -236,6 +244,31 @@ class Simulation(Canvas):
             
             self.checkWin()
     
+    def removeAction(self, column, percepts):
+        row = 0
+        while row < len(percepts):
+            # Full column condition
+            if percepts[0][column].color == "red" or percepts[0][column].color == "blue": 
+                percepts[0][column].switchColor("white") 
+                break;
+            
+            # If there exits a piece in the column, place the next piece above it
+            if percepts[row][column].color == "red" or percepts[row][column].color == "blue":
+                percepts[row][column].switchColor("white")
+                break
+            
+            # If there is no piece in the column, place it in the first spot
+            elif row == len(percepts) - 1:
+                percepts[row][column].switchColor("white")
+                break
+
+            # No open spot? Increment to find it
+            if percepts[row][column].color != "red" and percepts[row][column].color != "blue":
+                row += 1
+
+        print("!! Attempted to remove: (" + str(column) + ", " + str(row) + ") !!")
+        return percepts
+
     def temporaryAction(self, column, percepts, type="player"):
             row = 0
             placedRow = 0
@@ -496,7 +529,7 @@ class Simulation(Canvas):
 
             # Can we win this turn?
             if self.senseThreeInARow(self.color) == rootCol:
-                actuator += 10
+                actuator += 1000
 
             if rootRow == 5: # WAS !here
                 actuator += 1.1 # WAS !here
@@ -540,10 +573,10 @@ class Simulation(Canvas):
                     # if self.checkThreeInARow("blue" if self.color=="red" else "red") == playerColumn:
                     #     score -= 1
 
-                percepts, placedRowPlayer = self.temporaryAction(playerColumn, percepts, "null")
+                percepts, placedRowPlayer = self.temporaryAction(playerColumn, percepts, "null") # Mess with this
                 # score += 
                 self.dfsRecurse(percepts, playerColumn, actuator, depth-1)
-                percepts[placedRowPlayer][playerColumn].switchColor("white")
+                percepts[placedRowPlayer][playerColumn].switchColor("white") # Mess with this
 
             percepts[placedRow][rootCol].switchColor("white")
             # Subtract the best move the player could make from the
@@ -554,7 +587,14 @@ class Simulation(Canvas):
             # print("Switched: (", column ,  ", ", placedRow, ")")
         return actuator
 
-    def senseDFS(self, rootPercepts, depth=5):
+    def senseDFS(self, rootPercepts, depth=1):
+
+        if type(int(dfsDepth.get())) is not int or int(dfsDepth.get()) <= 0:
+            print("INVALID DFS DEPTH")
+            depth=5
+        else:
+            depth=int(dfsDepth.get())
+
         global evaluatedMoves
         actuators = [0,0,0,0,0,0,0]
         print("DFS DEPTH:", depth, "ply")
@@ -646,7 +686,7 @@ redWinsLabel.grid(row=6, column=0)
 tiesLabel.grid(row=7, column=0)
 
 numGames = Entry(root)
-numGames.insert(0,0)
+numGames.insert(0,"Number of Games")
 numGames.grid(row=8, column=0)
 
 startButton = Button(root, text="Start AI Battle!")
@@ -665,5 +705,9 @@ movesOverTimeLabel.grid(row=12, column=0)
 resetButton = Button(root, text="RESET")
 resetButton.bind("<Button-1>", menuChange)
 resetButton.grid(row=13, column=0)
+
+dfsDepth = Entry(root)
+dfsDepth.insert(0,"DFS Depth")
+dfsDepth.grid(row=14, column=0)
 
 root.mainloop()
