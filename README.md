@@ -1,5 +1,5 @@
 # Connect4
-Play connect 4 against some breadth first search oriented AI!
+Play connect 4 against some depth first search oriented AI!
 
 ## Report
 
