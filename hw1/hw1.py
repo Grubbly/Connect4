@@ -14,7 +14,7 @@ blueWins = 0
 redWins = 0
 ties = 0
 evaluatedMoves = 0
-countColor = "blue"
+countColor = "red"
 
 blueWinsText = "Blue Wins: " 
 redWinsText = "Red Wins: " 
@@ -93,8 +93,14 @@ class Simulation(Canvas):
                 self.mobileDefenseAgroAgent()
             if gameMode2.get() == options2[5]: # DFS
                 self.DFSAgent()
-            
 
+            self.randomCount += 2
+
+            if self.randomCount == 8:
+                rmColumn = random.randint(0,6)
+                self.removeAction(rmColumn, self.percepts)
+                self.randomCount = 0
+            
     def setPiece(self, event):
         if self.turn:
             if gameMode.get() == options[0]: # Player
@@ -590,7 +596,7 @@ class Simulation(Canvas):
     def senseDFS(self, rootPercepts, depth=1):
 
         if type(dfsDepth.get()) is not int or int(dfsDepth.get()) <= 0:
-            print("INVALID DFS DEPTH")
+            print("Invalid dfs depth specified, using default value")
             depth=5
         else:
             depth=int(dfsDepth.get())
