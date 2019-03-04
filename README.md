@@ -81,7 +81,7 @@ Three trials were carried out for each AI. Blue always represents the AI the sta
  DFS chose column: 4
  ```
   
-  ### Bugs
+### Bugs
   * Don't play as ```player``` for red team, its clunky.
   * The code is disgusting :)
   * Probably a lot more :D
