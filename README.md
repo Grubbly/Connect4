@@ -1,21 +1,42 @@
 # Connect4
-Play connect 4 against some depth first search oriented AI!
+Play connect 4 against some depth first search oriented AI! Be warned, there's twist: every 10 turns a random piece is removed from the board.
 
 ## Report
 
 Three trials were carried out for each AI. Blue always represents the AI the statistics correspond to. Red always represents the control group, which is a 'Defense AI' that blocks three in a rows.
 
+### Intelligent Agent Pattern
+
+|     Items    	|                                    Implementation                                    	|
+|:------------:	|:------------------------------------------------------------------------------------	|
+|  Environment 	| Connect4 board                                                                       	|
+|     Agent    	| <ul> <li>Random</li> <li> Defense </li><li> Defense Agro </li><li> Mobile Defense Agro </li><li> DFS </li></ul>|
+|     Sensors    	| <ul> <li>Variations of three in a row</li> <li> Mobile moves </li><li> Depth (for dfs) </li><li> Four in a rows </li></ul>|
+|  Percepts 	| Placeable columns on the board                                                                       	|
+|  Actuators 	| An individual columns total score                                                                       	|
+|  Actions 	| Add or remove a piece from the board                                                                       	|
+
 ### AI Types
 - **Defense** - Blocks three in a rows, otherwise uses random moves.
 - **Defense Agro** - Blocks three in a rows and forces a win if it has a three in a row, otherwise uses random moves.
 - **Mobile Defense Agro** - Blocks three in a rows and forces a win if it has a three in a row, otherwise places pieces in the most mobile locations i.e. locations that open up the most options for future moves.
+- **DFS** - Generates moves to a specified ply depth using DFS. Each column is evaluated by minimaxing each ply with values generated from the mobile, defensive, and aggressive methods described in the above agents. 
 
 ### [Statistics](https://docs.google.com/spreadsheets/d/1WFtJvH4xyIPUyRgYX3VY5aSd5MTep_LCcQxXsL9Izck/edit?usp=sharing)
 [![Statistics](stats3.PNG)](https://docs.google.com/spreadsheets/d/1WFtJvH4xyIPUyRgYX3VY5aSd5MTep_LCcQxXsL9Izck/edit?usp=sharing)
 
 ### Sample GUI Output
 
-![GUI](sampleOutput.PNG)
+#### Version 1:
+
+![asdfasdf](sampleOutput.PNG)
+
+
+#### Version 2:
+
+
+![TGUI](gui.PNG)
+
 
 #### Notes
 * The "Start AI Battle!" button only works when two AIs are matched against eachother.
@@ -25,7 +46,15 @@ Three trials were carried out for each AI. Blue always represents the AI the sta
 
 ### Sample CLI Output
 
+#### Mobile Defense Agro Output:
+
 ![CLI](sampleOutputCMD.PNG)
+
+
+#### DFS Output:
+
+
+![CLI](cliOutput2.PNG)
 
 #### Notes
 * ```CheckThreeInARow``` corresponds to the AI deciding to play defensively and block the player from winning.
@@ -45,6 +74,12 @@ Three trials were carried out for each AI. Blue always represents the AI the sta
   ```
     MOBILE: 3
   ```
+* ``` Column actuator->action evaluations ``` corresponds to the score of each column after the DFS agent has finished evaluating moves to the specified ply.
+ * Example of a finished DFS evaluation (the maximum is chosen):
+ ``` 
+ Column actuator->action evaluations:  [4.333333333333329, 6.333333333333329, 6.333333333333329, 6.190476190476186, 76.19047619047628, 0, 4.333333333333329]
+ DFS chose column: 4
+ ```
   
   ### Bugs
   * Don't play as ```player``` for red team, its clunky.
