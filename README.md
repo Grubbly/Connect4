@@ -7,14 +7,7 @@ Three trials were carried out for each AI. Blue always represents the AI the sta
 
 ### Intelligent Agent Pattern
 
-|     Items    	|                                    Implementation                                    	|
-|:------------:	|:------------------------------------------------------------------------------------	|
-|  Environment 	| Connect4 board                                                                       	|
-|     Agent    	| <ul> <li>Random</li> <li> Defense </li><li> Defense Agro </li><li> Mobile Defense Agro </li><li> DFS </li></ul>|
-|     Sensors    	| <ul> <li>Variations of three in a row</li> <li> Mobile moves </li><li> Depth (for dfs) </li><li> Four in a rows </li></ul>|
-|  Percepts 	| Placeable columns on the board                                                                       	|
-|  Actuators 	| An individual columns total score                                                                       	|
-|  Actions 	| Add or remove a piece from the board                                                                       	|
+![Table](Table.PNG)
 
 ### AI Types
 - **Defense** - Blocks three in a rows, otherwise uses random moves.
@@ -24,6 +17,19 @@ Three trials were carried out for each AI. Blue always represents the AI the sta
 
 ### [Statistics](https://docs.google.com/spreadsheets/d/1WFtJvH4xyIPUyRgYX3VY5aSd5MTep_LCcQxXsL9Izck/edit?usp=sharing)
 [![Statistics](stats3.PNG)](https://docs.google.com/spreadsheets/d/1WFtJvH4xyIPUyRgYX3VY5aSd5MTep_LCcQxXsL9Izck/edit?usp=sharing)
+
+The charts below represent the data displayed in tables above. The x-axis numbering maps to the following agents:
+
+* 1 = Defense
+* 2 = Defense Agro
+* 3 = Mobile Defense Agro
+* 4 = DFS (5 ply)
+
+![EMPS](EvaluatedMovesPerSecond.PNG)
+![noDFS](AgentScoreOverTimeNoDFS.PNG)
+![DFS](AgentScoreOverTimeDFS.PNG)
+![Time](Runtime.PNG)
+![Outcomes](GameOutcomes.PNG)
 
 ### Sample GUI Output
 
